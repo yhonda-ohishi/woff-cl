@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginPage } from './pages/LoginPage';
-import { ProfilePage } from './pages/ProfilePage';
 import { CallbackPage } from './pages/CallbackPage';
 import { UserManagementPage } from './pages/UserManagementPage';
 import './App.css';
@@ -13,7 +12,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <div>Loading...</div>;
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/" replace />;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
 function App() {
@@ -21,18 +20,10 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/callback" element={<CallbackPage />} />
           <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/management"
+            path="/"
             element={
               <ProtectedRoute>
                 <UserManagementPage />

@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ExchangeCodeRequest, ExchangeCodeResponse, GetAuthorizationURLRequest, GetAuthorizationURLResponse, GetProfileRequest, GetProfileResponse, RefreshTokenRequest, RefreshTokenResponse, VerifyTokenRequest, VerifyTokenResponse } from "./auth_pb.js";
+import { DeleteUserRequest, DeleteUserResponse, ExchangeCodeRequest, ExchangeCodeResponse, GetAuthorizationURLRequest, GetAuthorizationURLResponse, GetProfileRequest, GetProfileResponse, ListUsersRequest, ListUsersResponse, RefreshTokenRequest, RefreshTokenResponse, RestoreUserRequest, RestoreUserResponse, UpdateUserRolesRequest, UpdateUserRolesResponse, VerifyTokenRequest, VerifyTokenResponse } from "./auth_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -67,6 +67,50 @@ export const AuthService = {
       name: "VerifyToken",
       I: VerifyTokenRequest,
       O: VerifyTokenResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * ListUsers returns a list of all registered users (requires authentication)
+     *
+     * @generated from rpc auth.v1.AuthService.ListUsers
+     */
+    listUsers: {
+      name: "ListUsers",
+      I: ListUsersRequest,
+      O: ListUsersResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * UpdateUserRoles updates roles for a user (requires admin role)
+     *
+     * @generated from rpc auth.v1.AuthService.UpdateUserRoles
+     */
+    updateUserRoles: {
+      name: "UpdateUserRoles",
+      I: UpdateUserRolesRequest,
+      O: UpdateUserRolesResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * DeleteUser soft deletes a user (requires admin role)
+     *
+     * @generated from rpc auth.v1.AuthService.DeleteUser
+     */
+    deleteUser: {
+      name: "DeleteUser",
+      I: DeleteUserRequest,
+      O: DeleteUserResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * RestoreUser restores a soft-deleted user (requires admin role)
+     *
+     * @generated from rpc auth.v1.AuthService.RestoreUser
+     */
+    restoreUser: {
+      name: "RestoreUser",
+      I: RestoreUserRequest,
+      O: RestoreUserResponse,
       kind: MethodKind.Unary,
     },
   }

@@ -40,6 +40,16 @@ export function CallbackPage() {
         setTokens(response.accessToken, response.refreshToken);
 
         // ExchangeCodeレスポンスにユーザー情報が含まれているので、そこから取得
+        console.log('ExchangeCode response:', {
+          userId: response.userId,
+          userName: response.userName,
+          email: response.email,
+          displayName: response.displayName,
+          domainId: response.domainId,
+          roles: response.roles,
+          profileImageUrl: response.profileImageUrl,
+        });
+
         const userProfile = new GetProfileResponse({
           userId: response.userId,
           userName: response.userName,
@@ -49,10 +59,11 @@ export function CallbackPage() {
           roles: response.roles,
           profileImageUrl: response.profileImageUrl,
         });
+        console.log('Created user profile:', userProfile);
         setUser(userProfile);
 
         sessionStorage.removeItem('oauth_state');
-        navigate('/profile');
+        navigate('/');
       } catch (err) {
         console.error('Failed to exchange code:', err);
         setError('Failed to complete authentication. Please try again.');
@@ -68,7 +79,7 @@ export function CallbackPage() {
       <div style={{ padding: '2rem', textAlign: 'center' }}>
         <h2>Authentication Error</h2>
         <p style={{ color: 'red' }}>{error}</p>
-        <button onClick={() => navigate('/')}>Go to Login</button>
+        <button onClick={() => navigate('/login')}>Go to Login</button>
       </div>
     );
   }

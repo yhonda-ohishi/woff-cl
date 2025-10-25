@@ -7,27 +7,34 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
 
 /**
- * Request to get WOFF OAuth authorization URL
+ * Request to get OAuth authorization URL
  *
  * @generated from message auth.v1.GetAuthorizationURLRequest
  */
 export class GetAuthorizationURLRequest extends Message<GetAuthorizationURLRequest> {
   /**
-   * @generated from field: string redirect_uri = 1;
+   * "woff" or "line" (default: "woff")
+   *
+   * @generated from field: string provider = 1;
+   */
+  provider = "";
+
+  /**
+   * @generated from field: string redirect_uri = 2;
    */
   redirectUri = "";
 
   /**
    * CSRF protection state
    *
-   * @generated from field: string state = 2;
+   * @generated from field: string state = 3;
    */
   state = "";
 
   /**
    * Optional scopes
    *
-   * @generated from field: repeated string scopes = 3;
+   * @generated from field: repeated string scopes = 4;
    */
   scopes: string[] = [];
 
@@ -39,9 +46,10 @@ export class GetAuthorizationURLRequest extends Message<GetAuthorizationURLReque
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "auth.v1.GetAuthorizationURLRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "redirect_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "state", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "scopes", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: "provider", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "redirect_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "state", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "scopes", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetAuthorizationURLRequest {
@@ -113,19 +121,26 @@ export class GetAuthorizationURLResponse extends Message<GetAuthorizationURLResp
  */
 export class ExchangeCodeRequest extends Message<ExchangeCodeRequest> {
   /**
-   * @generated from field: string code = 1;
+   * "woff" or "line" (default: "woff")
+   *
+   * @generated from field: string provider = 1;
+   */
+  provider = "";
+
+  /**
+   * @generated from field: string code = 2;
    */
   code = "";
 
   /**
-   * @generated from field: string redirect_uri = 2;
+   * @generated from field: string redirect_uri = 3;
    */
   redirectUri = "";
 
   /**
    * CSRF verification
    *
-   * @generated from field: string state = 3;
+   * @generated from field: string state = 4;
    */
   state = "";
 
@@ -137,9 +152,10 @@ export class ExchangeCodeRequest extends Message<ExchangeCodeRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "auth.v1.ExchangeCodeRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "redirect_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "state", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "provider", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "redirect_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "state", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExchangeCodeRequest {
@@ -160,7 +176,7 @@ export class ExchangeCodeRequest extends Message<ExchangeCodeRequest> {
 }
 
 /**
- * Response containing WOFF access tokens and user info
+ * Response containing OAuth access tokens and user info
  *
  * @generated from message auth.v1.ExchangeCodeResponse
  */
@@ -198,32 +214,39 @@ export class ExchangeCodeResponse extends Message<ExchangeCodeResponse> {
   userId = "";
 
   /**
-   * @generated from field: string user_name = 7;
+   * "woff" or "line"
+   *
+   * @generated from field: string provider = 7;
+   */
+  provider = "";
+
+  /**
+   * @generated from field: string user_name = 8;
    */
   userName = "";
 
   /**
-   * @generated from field: string email = 8;
+   * @generated from field: string email = 9;
    */
   email = "";
 
   /**
-   * @generated from field: string display_name = 9;
+   * @generated from field: string display_name = 10;
    */
   displayName = "";
 
   /**
-   * @generated from field: string domain_id = 10;
+   * @generated from field: string domain_id = 11;
    */
   domainId = "";
 
   /**
-   * @generated from field: repeated string roles = 11;
+   * @generated from field: repeated string roles = 12;
    */
   roles: string[] = [];
 
   /**
-   * @generated from field: string profile_image_url = 12;
+   * @generated from field: string profile_image_url = 13;
    */
   profileImageUrl = "";
 
@@ -241,12 +264,13 @@ export class ExchangeCodeResponse extends Message<ExchangeCodeResponse> {
     { no: 4, name: "token_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "scope", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 6, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "user_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "domain_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 11, name: "roles", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 12, name: "profile_image_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "provider", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "user_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: "domain_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 12, name: "roles", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 13, name: "profile_image_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExchangeCodeResponse {
@@ -309,32 +333,39 @@ export class GetProfileResponse extends Message<GetProfileResponse> {
   userId = "";
 
   /**
-   * @generated from field: string user_name = 2;
+   * "woff" or "line"
+   *
+   * @generated from field: string provider = 2;
+   */
+  provider = "";
+
+  /**
+   * @generated from field: string user_name = 3;
    */
   userName = "";
 
   /**
-   * @generated from field: string email = 3;
+   * @generated from field: string email = 4;
    */
   email = "";
 
   /**
-   * @generated from field: string display_name = 4;
+   * @generated from field: string display_name = 5;
    */
   displayName = "";
 
   /**
-   * @generated from field: string domain_id = 5;
+   * @generated from field: string domain_id = 6;
    */
   domainId = "";
 
   /**
-   * @generated from field: repeated string roles = 6;
+   * @generated from field: repeated string roles = 7;
    */
   roles: string[] = [];
 
   /**
-   * @generated from field: string profile_image_url = 7;
+   * @generated from field: string profile_image_url = 8;
    */
   profileImageUrl = "";
 
@@ -347,12 +378,13 @@ export class GetProfileResponse extends Message<GetProfileResponse> {
   static readonly typeName = "auth.v1.GetProfileResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "user_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "domain_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "roles", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 7, name: "profile_image_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "provider", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "user_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "domain_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "roles", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 8, name: "profile_image_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetProfileResponse {
@@ -547,6 +579,453 @@ export class VerifyTokenResponse extends Message<VerifyTokenResponse> {
 
   static equals(a: VerifyTokenResponse | PlainMessage<VerifyTokenResponse> | undefined, b: VerifyTokenResponse | PlainMessage<VerifyTokenResponse> | undefined): boolean {
     return proto3.util.equals(VerifyTokenResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message auth.v1.ListUsersRequest
+ */
+export class ListUsersRequest extends Message<ListUsersRequest> {
+  /**
+   * Page number (default: 1)
+   *
+   * @generated from field: int32 page = 1;
+   */
+  page = 0;
+
+  /**
+   * Number of users per page (default: 50, max: 100)
+   *
+   * @generated from field: int32 page_size = 2;
+   */
+  pageSize = 0;
+
+  /**
+   * Include soft-deleted users (default: false)
+   *
+   * @generated from field: bool include_deleted = 3;
+   */
+  includeDeleted = false;
+
+  constructor(data?: PartialMessage<ListUsersRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "auth.v1.ListUsersRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "page", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 2, name: "page_size", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 3, name: "include_deleted", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUsersRequest {
+    return new ListUsersRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUsersRequest {
+    return new ListUsersRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUsersRequest {
+    return new ListUsersRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListUsersRequest | PlainMessage<ListUsersRequest> | undefined, b: ListUsersRequest | PlainMessage<ListUsersRequest> | undefined): boolean {
+    return proto3.util.equals(ListUsersRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message auth.v1.User
+ */
+export class User extends Message<User> {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId = "";
+
+  /**
+   * "woff" or "line"
+   *
+   * @generated from field: string provider = 2;
+   */
+  provider = "";
+
+  /**
+   * @generated from field: string user_name = 3;
+   */
+  userName = "";
+
+  /**
+   * @generated from field: string display_name = 4;
+   */
+  displayName = "";
+
+  /**
+   * @generated from field: repeated string roles = 5;
+   */
+  roles: string[] = [];
+
+  /**
+   * @generated from field: string created_at = 6;
+   */
+  createdAt = "";
+
+  /**
+   * @generated from field: string updated_at = 7;
+   */
+  updatedAt = "";
+
+  /**
+   * @generated from field: bool is_deleted = 8;
+   */
+  isDeleted = false;
+
+  constructor(data?: PartialMessage<User>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "auth.v1.User";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "provider", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "user_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "roles", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 6, name: "created_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "updated_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "is_deleted", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): User {
+    return new User().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): User {
+    return new User().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): User {
+    return new User().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: User | PlainMessage<User> | undefined, b: User | PlainMessage<User> | undefined): boolean {
+    return proto3.util.equals(User, a, b);
+  }
+}
+
+/**
+ * @generated from message auth.v1.ListUsersResponse
+ */
+export class ListUsersResponse extends Message<ListUsersResponse> {
+  /**
+   * @generated from field: repeated auth.v1.User users = 1;
+   */
+  users: User[] = [];
+
+  /**
+   * @generated from field: int32 total_count = 2;
+   */
+  totalCount = 0;
+
+  /**
+   * @generated from field: int32 page = 3;
+   */
+  page = 0;
+
+  /**
+   * @generated from field: int32 page_size = 4;
+   */
+  pageSize = 0;
+
+  constructor(data?: PartialMessage<ListUsersResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "auth.v1.ListUsersResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "users", kind: "message", T: User, repeated: true },
+    { no: 2, name: "total_count", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 3, name: "page", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 4, name: "page_size", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUsersResponse {
+    return new ListUsersResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUsersResponse {
+    return new ListUsersResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUsersResponse {
+    return new ListUsersResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListUsersResponse | PlainMessage<ListUsersResponse> | undefined, b: ListUsersResponse | PlainMessage<ListUsersResponse> | undefined): boolean {
+    return proto3.util.equals(ListUsersResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message auth.v1.UpdateUserRolesRequest
+ */
+export class UpdateUserRolesRequest extends Message<UpdateUserRolesRequest> {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId = "";
+
+  /**
+   * New roles to set for the user
+   *
+   * @generated from field: repeated string roles = 2;
+   */
+  roles: string[] = [];
+
+  constructor(data?: PartialMessage<UpdateUserRolesRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "auth.v1.UpdateUserRolesRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "roles", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserRolesRequest {
+    return new UpdateUserRolesRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserRolesRequest {
+    return new UpdateUserRolesRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserRolesRequest {
+    return new UpdateUserRolesRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateUserRolesRequest | PlainMessage<UpdateUserRolesRequest> | undefined, b: UpdateUserRolesRequest | PlainMessage<UpdateUserRolesRequest> | undefined): boolean {
+    return proto3.util.equals(UpdateUserRolesRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message auth.v1.UpdateUserRolesResponse
+ */
+export class UpdateUserRolesResponse extends Message<UpdateUserRolesResponse> {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success = false;
+
+  /**
+   * @generated from field: string message = 2;
+   */
+  message = "";
+
+  /**
+   * Updated roles
+   *
+   * @generated from field: repeated string roles = 3;
+   */
+  roles: string[] = [];
+
+  constructor(data?: PartialMessage<UpdateUserRolesResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "auth.v1.UpdateUserRolesResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "success", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "roles", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserRolesResponse {
+    return new UpdateUserRolesResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserRolesResponse {
+    return new UpdateUserRolesResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserRolesResponse {
+    return new UpdateUserRolesResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateUserRolesResponse | PlainMessage<UpdateUserRolesResponse> | undefined, b: UpdateUserRolesResponse | PlainMessage<UpdateUserRolesResponse> | undefined): boolean {
+    return proto3.util.equals(UpdateUserRolesResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message auth.v1.DeleteUserRequest
+ */
+export class DeleteUserRequest extends Message<DeleteUserRequest> {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId = "";
+
+  constructor(data?: PartialMessage<DeleteUserRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "auth.v1.DeleteUserRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteUserRequest {
+    return new DeleteUserRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteUserRequest {
+    return new DeleteUserRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteUserRequest {
+    return new DeleteUserRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DeleteUserRequest | PlainMessage<DeleteUserRequest> | undefined, b: DeleteUserRequest | PlainMessage<DeleteUserRequest> | undefined): boolean {
+    return proto3.util.equals(DeleteUserRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message auth.v1.DeleteUserResponse
+ */
+export class DeleteUserResponse extends Message<DeleteUserResponse> {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success = false;
+
+  /**
+   * @generated from field: string message = 2;
+   */
+  message = "";
+
+  constructor(data?: PartialMessage<DeleteUserResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "auth.v1.DeleteUserResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "success", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteUserResponse {
+    return new DeleteUserResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteUserResponse {
+    return new DeleteUserResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteUserResponse {
+    return new DeleteUserResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DeleteUserResponse | PlainMessage<DeleteUserResponse> | undefined, b: DeleteUserResponse | PlainMessage<DeleteUserResponse> | undefined): boolean {
+    return proto3.util.equals(DeleteUserResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message auth.v1.RestoreUserRequest
+ */
+export class RestoreUserRequest extends Message<RestoreUserRequest> {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId = "";
+
+  constructor(data?: PartialMessage<RestoreUserRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "auth.v1.RestoreUserRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RestoreUserRequest {
+    return new RestoreUserRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RestoreUserRequest {
+    return new RestoreUserRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RestoreUserRequest {
+    return new RestoreUserRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: RestoreUserRequest | PlainMessage<RestoreUserRequest> | undefined, b: RestoreUserRequest | PlainMessage<RestoreUserRequest> | undefined): boolean {
+    return proto3.util.equals(RestoreUserRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message auth.v1.RestoreUserResponse
+ */
+export class RestoreUserResponse extends Message<RestoreUserResponse> {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success = false;
+
+  /**
+   * @generated from field: string message = 2;
+   */
+  message = "";
+
+  constructor(data?: PartialMessage<RestoreUserResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "auth.v1.RestoreUserResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "success", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RestoreUserResponse {
+    return new RestoreUserResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RestoreUserResponse {
+    return new RestoreUserResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RestoreUserResponse {
+    return new RestoreUserResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: RestoreUserResponse | PlainMessage<RestoreUserResponse> | undefined, b: RestoreUserResponse | PlainMessage<RestoreUserResponse> | undefined): boolean {
+    return proto3.util.equals(RestoreUserResponse, a, b);
   }
 }
 
