@@ -160,7 +160,7 @@ export class ExchangeCodeRequest extends Message<ExchangeCodeRequest> {
 }
 
 /**
- * Response containing WOFF access tokens
+ * Response containing WOFF access tokens and user info
  *
  * @generated from message auth.v1.ExchangeCodeResponse
  */
@@ -190,6 +190,43 @@ export class ExchangeCodeResponse extends Message<ExchangeCodeResponse> {
    */
   scope: string[] = [];
 
+  /**
+   * User information (included for convenience)
+   *
+   * @generated from field: string user_id = 6;
+   */
+  userId = "";
+
+  /**
+   * @generated from field: string user_name = 7;
+   */
+  userName = "";
+
+  /**
+   * @generated from field: string email = 8;
+   */
+  email = "";
+
+  /**
+   * @generated from field: string display_name = 9;
+   */
+  displayName = "";
+
+  /**
+   * @generated from field: string domain_id = 10;
+   */
+  domainId = "";
+
+  /**
+   * @generated from field: repeated string roles = 11;
+   */
+  roles: string[] = [];
+
+  /**
+   * @generated from field: string profile_image_url = 12;
+   */
+  profileImageUrl = "";
+
   constructor(data?: PartialMessage<ExchangeCodeResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -203,6 +240,13 @@ export class ExchangeCodeResponse extends Message<ExchangeCodeResponse> {
     { no: 3, name: "expires_in", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
     { no: 4, name: "token_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "scope", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 6, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "user_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: "domain_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: "roles", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 12, name: "profile_image_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExchangeCodeResponse {

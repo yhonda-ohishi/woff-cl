@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authClient } from '../lib/auth-client';
+import { GetProfileResponse } from '../gen/auth/v1/auth_pb';
 
 export function CallbackPage() {
   const navigate = useNavigate();
-  const { setTokens } = useAuth();
+  const { setTokens, setUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
 
@@ -35,7 +36,21 @@ export function CallbackPage() {
           state: state || '',
         });
 
+        // Set tokens
         setTokens(response.accessToken, response.refreshToken);
+
+        // ExchangeCodeレスポンスにユーザー情報が含まれているので、そこから取得
+        const userProfile = new GetProfileResponse({
+          userId: response.userId,
+          userName: response.userName,
+          email: response.email,
+          displayName: response.displayName,
+          domainId: response.domainId,
+          roles: response.roles,
+          profileImageUrl: response.profileImageUrl,
+        });
+        setUser(userProfile);
+
         sessionStorage.removeItem('oauth_state');
         navigate('/profile');
       } catch (err) {
@@ -46,7 +61,7 @@ export function CallbackPage() {
     };
 
     handleCallback();
-  }, [navigate, setTokens]);
+  }, [navigate, setTokens, setUser]);
 
   if (error) {
     return (

@@ -39,11 +39,34 @@
 }
 
 
-.profile-card h1 {
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.profile-card h1 {
+  margin: 0;
   color: #333;
-  text-align: center;
   font-size: 1.5rem;
+}
+
+.management-button {
+  background: #06c755;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s;
+}
+
+.management-button:hover {
+  background: #05b34a;
 }
 
 @media (min-width: 768px) {

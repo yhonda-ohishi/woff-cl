@@ -35,7 +35,12 @@ export function ProfilePage() {
   return (
     <div className="profile-container">
       <div className="profile-card">
-        <h1>User Profile</h1>
+        <div className="profile-header">
+          <h1>User Profile</h1>
+          <button onClick={() => navigate('/management')} className="management-button">
+            管理画面
+          </button>
+        </div>
 
         <div className="profile-info">
           {user.profileImageUrl && (

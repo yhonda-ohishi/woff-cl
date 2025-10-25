@@ -1,6 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
-import { authClient } from '../lib/auth-client';
 import type { GetProfileResponse } from '../gen/auth/v1/auth_pb';
 
 interface AuthContextType {
@@ -10,6 +9,7 @@ interface AuthContextType {
   login: (authorizationUrl: string) => void;
   logout: () => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
+  setUser: (user: GetProfileResponse) => void;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -24,34 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [refreshToken, setRefreshToken] = useState<string | null>(
     localStorage.getItem('refresh_token')
   );
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (accessToken) {
-      fetchProfile();
-    } else {
-      setIsLoading(false);
-    }
-  }, [accessToken]);
-
-  const fetchProfile = async () => {
-    try {
-      const profile = await authClient.getProfile(
-        {},
-        {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      setUser(profile);
-    } catch (error) {
-      console.error('Failed to fetch profile:', error);
-      logout();
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [isLoading] = useState(false);
 
   const login = (authorizationUrl: string) => {
     window.location.href = authorizationUrl;
@@ -81,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         setTokens,
+        setUser,
         isAuthenticated: !!user,
         isLoading,
       }}
