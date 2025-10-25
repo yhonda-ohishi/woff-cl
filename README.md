@@ -1,69 +1,191 @@
-# React + TypeScript + Vite
+# WOFF (LINE WORKS) Authentication Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite + Cloudflare Workers フロントエンドアプリケーション。LINE WORKS OAuth 2.0認証を使用したgRPCバックエンドと統合します。
 
-Currently, two official plugins are available:
+## 機能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- LINE WORKS OAuth 2.0認証フロー
+- gRPC-Web (Connect) を使用したバックエンド通信
+- Buf Schema Registry (BSR) からの型安全なAPI
+- React Router によるルーティング
+- Cloudflare Workers へのデプロイ対応
 
-## Expanding the ESLint configuration
+## 前提条件
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js 18以上
+- npm または yarn
+- バックエンドサーバー ([woff_sv](https://github.com/yhonda-ohishi/woff_sv)) が実行中であること
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## セットアップ
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 1. 依存関係のインストール
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. 環境変数の設定
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+`.env`ファイルを作成（または`.env.example`をコピー）:
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
+
+`.env`ファイルを編集してバックエンドAPIのURLを設定:
+
+```
+VITE_API_URL=http://localhost:50051
+```
+
+### 3. 開発サーバーの起動
+
+```bash
+npm run dev
+```
+
+アプリケーションは [http://localhost:5173](http://localhost:5173) で起動します。
+
+## プロジェクト構造
+
+```
+src/
+├── contexts/
+│   └── AuthContext.tsx      # 認証コンテキストとフック
+├── gen/
+│   └── auth/v1/             # BSRから生成されたコード
+│       ├── auth_pb.ts       # Protobuf型定義
+│       └── auth_connect.ts  # Connect-Web クライアント
+├── lib/
+│   └── auth-client.ts       # gRPC-Web クライアント設定
+├── pages/
+│   ├── LoginPage.tsx        # ログインページ
+│   ├── CallbackPage.tsx     # OAuth コールバックハンドラー
+│   └── ProfilePage.tsx      # ユーザープロファイルページ
+├── App.tsx                  # メインアプリケーション
+└── main.tsx                 # エントリーポイント
+```
+
+## 使い方
+
+### 1. ログイン
+
+1. ブラウザで [http://localhost:5173](http://localhost:5173) を開く
+2. "Login with LINE WORKS" ボタンをクリック
+3. LINE WORKS認証画面でログイン
+4. 認証後、プロファイルページにリダイレクトされます
+
+### 2. プロファイル表示
+
+認証後、以下のユーザー情報が表示されます:
+
+- 表示名
+- ユーザー名
+- メールアドレス
+- ユーザーID
+- ドメインID
+- ロール
+
+## スクリプト
+
+### 開発
+
+```bash
+npm run dev
+```
+
+開発サーバーを起動（HMR有効）
+
+### ビルド
+
+```bash
+npm run build
+```
+
+本番用にビルド
+
+### プレビュー
+
+```bash
+npm run preview
+```
+
+ビルド後のアプリケーションをプレビュー
+
+### デプロイ
+
+```bash
+npm run deploy
+```
+
+Cloudflare Workers にデプロイ
+
+### コード生成
+
+BSRからProtoコードを再生成:
+
+```bash
+npx buf generate buf.build/yhonda/woff-auth
+```
+
+## API エンドポイント
+
+### 使用しているgRPC メソッド
+
+- `GetAuthorizationURL` - OAuth認証URLを取得
+- `ExchangeCode` - 認証コードをトークンに交換
+- `GetProfile` - ユーザープロファイルを取得
+
+詳細は [woff_sv README](https://github.com/yhonda-ohishi/woff_sv) を参照
+
+## 環境変数
+
+| 変数名 | 説明 | デフォルト値 |
+|--------|------|-------------|
+| `VITE_API_URL` | バックエンドgRPC APIのURL | `http://localhost:50051` |
+
+## セキュリティ
+
+- OAuth stateパラメータによるCSRF保護
+- アクセストークンとリフレッシュトークンをlocalStorageに保存
+- 認証が必要なルートはProtectedRouteコンポーネントで保護
+
+## トラブルシューティング
+
+### CORSエラー
+
+バックエンドサーバーでCORSが有効になっていることを確認してください。
+
+### 認証エラー
+
+1. バックエンドサーバーが起動していることを確認
+2. `VITE_API_URL`が正しく設定されていることを確認
+3. LINE WORKS Developer ConsoleでリダイレクトURIが正しく設定されていることを確認
+
+### コード生成エラー
+
+```bash
+npm install --legacy-peer-deps
+npx buf generate buf.build/yhonda/woff-auth
+```
+
+## 技術スタック
+
+- **React 19** - UIライブラリ
+- **TypeScript** - 型安全性
+- **Vite** - ビルドツール
+- **React Router** - ルーティング
+- **Connect-Web** - gRPC-Web クライアント
+- **Buf Schema Registry** - Protoスキーマ管理
+- **Cloudflare Workers** - デプロイプラットフォーム
+
+## ライセンス
+
+MIT License
+
+## 参考リンク
+
+- [バックエンド (woff_sv)](https://github.com/yhonda-ohishi/woff_sv)
+- [Buf Schema Registry](https://buf.build/yhonda/woff-auth)
+- [Connect-Web Documentation](https://connectrpc.com/docs/web/getting-started)
+- [LINE WORKS Developers](https://developers.worksmobile.com/)

@@ -12,11 +12,18 @@
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
+		"@bufbuild/protobuf": "^1.10.0",
+		"@connectrpc/connect": "^1.7.0",
+		"@connectrpc/connect-web": "^1.7.0",
 		"react": "^19.1.1",
-		"react-dom": "^19.1.1"
+		"react-dom": "^19.1.1",
+		"react-router-dom": "^7.9.4"
 	},
 	"devDependencies": {
+		"@bufbuild/buf": "^1.59.0",
+		"@bufbuild/protoc-gen-es": "^1.10.0",
 		"@cloudflare/vite-plugin": "^1.13.15",
+		"@connectrpc/protoc-gen-connect-es": "^1.7.0",
 		"@eslint/js": "^9.33.0",
 		"@types/react": "^19.1.10",
 		"@types/react-dom": "^19.1.7",
