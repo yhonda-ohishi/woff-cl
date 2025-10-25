@@ -25,7 +25,7 @@ export function LoginPage() {
       login(response.authorizationUrl);
     } catch (err) {
       console.error('Failed to get authorization URL:', err);
-      setError('Failed to initiate login. Please try again.');
+      setError('Failed to initiate login. Please check that the backend is registered.');
       setIsLoading(false);
     }
   };
