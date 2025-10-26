@@ -44,6 +44,152 @@
   background: #d32f2f;
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.video-call-button {
+  position: relative;
+  background: transparent;
+  border: none;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-call-button:hover {
+  transform: scale(1.1);
+}
+
+.video-call-button .video-call-icon {
+  font-size: 1.5rem;
+}
+
+.video-call-button.has-participants .video-call-icon {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.video-call-button .online-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4444;
+  color: white;
+  border-radius: 12px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+.enable-audio-button {
+  background: #ff9800;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  animation: attention-pulse 1.5s ease-in-out infinite;
+}
+
+.enable-audio-button:hover {
+  transform: scale(1.1);
+  background: #f57c00;
+}
+
+@keyframes attention-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.mute-button {
+  background: transparent;
+  border: none;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.mute-button:hover {
+  transform: scale(1.1);
+}
+
+/* Recording Control - Label + Toggle */
+.recording-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recording-label {
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Recording Toggle Button - Round ON/OFF switch */
+.recording-toggle {
+  position: relative;
+  width: 50px;
+  height: 26px;
+  border-radius: 13px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.recording-toggle.enabled {
+  background: #4caf50;
+}
+
+.recording-toggle.disabled {
+  background: #ccc;
+}
+
+.recording-toggle:hover {
+  opacity: 0.8;
+}
+
+.recording-toggle::before {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.recording-toggle.enabled::before {
+  left: 26px;
+}
+
+.recording-toggle.disabled::before {
+  left: 2px;
+}
+
 .hamburger-button {
   background: none;
   border: none;
@@ -120,6 +266,24 @@
 
 .menu-icon {
   font-size: 1.2rem;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes badge-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 68, 68, 0);
+  }
 }
 
 .management-content {
@@ -426,6 +590,96 @@
 .provider-prefix.provider-line {
   background: #06c755;
   color: white;
+}
+
+/* Video Call Section */
+.video-call-section {
+  padding: 2rem 0;
+}
+
+.section-description {
+  margin-bottom: 2rem;
+  color: #666;
+  font-size: 1rem;
+}
+
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.user-call-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.user-call-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.user-call-info {
+  flex: 1;
+}
+
+.user-call-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-call-username {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.user-call-roles {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.call-button {
+  background: #06c755;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.call-button:hover {
+  background: #05b34a;
+  transform: scale(1.02);
+}
+
+.call-icon {
+  font-size: 1.2rem;
+}
+
+.no-users {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+  font-size: 1.1rem;
 }
 
 .action-buttons {

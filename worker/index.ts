@@ -1,9 +1,11 @@
 import { BackendProxy } from "./backend-proxy";
+import { WebRTCSignaling } from "./webrtc-signaling";
 
-export { BackendProxy };
+export { BackendProxy, WebRTCSignaling };
 
 interface Env {
   BACKEND_PROXY: DurableObjectNamespace;
+  WEBRTC_SIGNALING: DurableObjectNamespace;
   BACKEND_SECRET?: string;
 }
 
@@ -71,15 +73,111 @@ export default {
       }
     }
 
+    // WebSocket endpoint to wait for backend connection (authenticated with secret)
+    if (url.pathname === "/wait-for-backend" && request.headers.get("Upgrade") === "websocket") {
+      // Validate secret from query parameter or header
+      const authHeader = request.headers.get("Authorization");
+      const secretParam = url.searchParams.get("secret");
+      const expectedSecret = env.BACKEND_SECRET || "dev-secret-123";
+
+      const providedSecret = authHeader?.replace("Bearer ", "") || secretParam;
+
+      if (!providedSecret || providedSecret !== expectedSecret) {
+        return Response.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      try {
+        // Forward WebSocket upgrade to Durable Object
+        const id = env.BACKEND_PROXY.idFromName("main");
+        const stub = env.BACKEND_PROXY.get(id);
+
+        const wsRequest = new Request("http://internal/wait-for-backend", {
+          headers: request.headers,
+        });
+
+        return stub.fetch(wsRequest);
+      } catch (error) {
+        return Response.json({ error: "Failed to establish WebSocket connection" }, { status: 500 });
+      }
+    }
+
+    // WebRTC room count endpoint
+    if (url.pathname === "/api/webrtc-room-count" && request.method === "GET") {
+      const roomId = url.searchParams.get("roomId");
+
+      if (!roomId) {
+        return Response.json({ error: "Room ID is required" }, { status: 400 });
+      }
+
+      // Get Durable Object for this room
+      const id = env.WEBRTC_SIGNALING.idFromName(roomId);
+      const stub = env.WEBRTC_SIGNALING.get(id);
+
+      // Forward request to Durable Object
+      const countUrl = new URL(request.url);
+      countUrl.pathname = "/room-count";
+
+      const countRequest = new Request(countUrl.toString(), {
+        method: "GET",
+      });
+
+      return stub.fetch(countRequest);
+    }
+
+    // WebRTC signaling endpoint
+    if (url.pathname.startsWith("/webrtc/")) {
+      const roomId = url.pathname.replace(/^\/webrtc\//, "");
+
+      if (!roomId) {
+        return Response.json({ error: "Room ID is required" }, { status: 400 });
+      }
+
+      // Get Durable Object for this room
+      const id = env.WEBRTC_SIGNALING.idFromName(roomId);
+      const stub = env.WEBRTC_SIGNALING.get(id);
+
+      // Forward WebSocket upgrade to Durable Object
+      const signalingUrl = new URL(request.url);
+      signalingUrl.pathname = "/connect";
+
+      const signalingRequest = new Request(signalingUrl.toString(), {
+        method: request.method,
+        headers: request.headers,
+      });
+
+      return stub.fetch(signalingRequest);
+    }
+
     // Route API requests to the Durable Object
     if (url.pathname.startsWith("/api/")) {
+      // Handle CORS preflight
+      if (request.method === "OPTIONS") {
+        const origin = request.headers.get("Origin") || "https://ohishi-pwa-woff.mtamaramu.com";
+        return new Response(null, {
+          status: 204,
+          headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Connect-Protocol-Version, Connect-Timeout-Ms",
+            "Access-Control-Max-Age": "86400",
+          },
+        });
+      }
+
       // Get the Durable Object stub (using a fixed ID for singleton behavior)
       const id = env.BACKEND_PROXY.idFromName("main");
       const stub = env.BACKEND_PROXY.get(id);
 
-      // Remove /api prefix and forward to Durable Object
+      // Check if this is a Connect-Web gRPC request or REST API
+      // Connect-Web paths: /api/auth.v1.AuthService/... -> remove /api prefix
+      // REST API paths: /api/recordings/upload -> keep /api prefix
       const proxyUrl = new URL(request.url);
-      proxyUrl.pathname = proxyUrl.pathname.replace(/^\/api/, "");
+      if (url.pathname.match(/^\/api\/[a-z]+\.v\d+\./)) {
+        // Connect-Web gRPC path - remove /api prefix
+        proxyUrl.pathname = url.pathname.replace(/^\/api/, "");
+      }
+      // Otherwise keep the path as-is (REST API endpoints keep /api prefix)
 
       const proxyRequest = new Request(proxyUrl.toString(), {
         method: request.method,
@@ -87,7 +185,19 @@ export default {
         body: request.body,
       });
 
-      return stub.fetch(proxyRequest);
+      const response = await stub.fetch(proxyRequest);
+
+      // Clone response and add CORS headers
+      const origin = request.headers.get("Origin") || "https://ohishi-pwa-woff.mtamaramu.com";
+      const newHeaders = new Headers(response.headers);
+      newHeaders.set("Access-Control-Allow-Origin", origin);
+      newHeaders.set("Access-Control-Allow-Credentials", "true");
+
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: newHeaders,
+      });
     }
 
     // All other requests return 404 (React app is served via assets)

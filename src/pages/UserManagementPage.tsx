@@ -1,6 +1,6 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { createPromiseClient } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
@@ -28,7 +28,26 @@ export function UserManagementPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [nfcData, setNfcData] = useState<string[]>([]);
   const [nfcError, setNfcError] = useState<string | null>(null);
+
+  // Video call room state
+  const [roomParticipantCount, setRoomParticipantCount] = useState<number>(0);
+  const roomWsRef = useRef<WebSocket | null>(null);
   const [isNfcSupported, setIsNfcSupported] = useState(true);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const previousCountRef = useRef<number>(0);
+  const notificationIntervalRef = useRef<number | null>(null);
+
+  // Notification sound state
+  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+
+  // Recording state
+  const [autoRecordingEnabled, setAutoRecordingEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('autoRecordingEnabled') === 'true';
+  });
+
+  // Check if device is mobile
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   // Create API client
   const transport = createConnectTransport({
@@ -40,6 +59,180 @@ export function UserManagementPage() {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  // Initialize AudioContext and play test sound
+  const initializeAudio = async () => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+
+      const ctx = audioContextRef.current;
+
+      // Resume AudioContext if it's suspended
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+
+      // Check if AudioContext is running
+      if (ctx.state === 'running') {
+        console.log('AudioContext initialized successfully');
+        setIsAudioEnabled(true);
+
+        // Load mute preference from localStorage
+        const savedMuteState = localStorage.getItem('videoCallNotificationMuted');
+        if (savedMuteState === 'true') {
+          setIsMuted(true);
+        }
+
+        // Play a short test sound
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.frequency.value = 600;
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.1);
+
+        console.log('Test sound played');
+        return true;
+      } else {
+        console.warn('AudioContext not running:', ctx.state);
+        return false;
+      }
+    } catch (error) {
+      console.error('Failed to initialize audio:', error);
+      return false;
+    }
+  };
+
+  // Play notification sound when someone joins video call
+  const playNotificationSound = async () => {
+    console.log('playNotificationSound called - isAudioEnabled:', isAudioEnabled, 'isMuted:', isMuted);
+
+    // Don't play if muted
+    if (isMuted) {
+      console.log('Notification sound muted');
+      return;
+    }
+
+    // Don't play if audio not enabled
+    if (!isAudioEnabled) {
+      console.log('Audio not enabled, attempting to initialize...');
+      // Try to initialize audio again
+      const success = await initializeAudio();
+      if (!success) {
+        console.log('Failed to initialize audio');
+        return;
+      }
+    }
+
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+
+      const ctx = audioContextRef.current;
+
+      // Resume AudioContext if it's suspended
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+
+      // Create a pleasant notification sound (two tones)
+      const playTone = (frequency: number, startTime: number, duration: number) => {
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.15, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+      };
+
+      const now = ctx.currentTime;
+      playTone(800, now, 0.15);      // First tone
+      playTone(1000, now + 0.15, 0.2); // Second tone (higher pitch)
+
+      console.log('Notification sound played');
+    } catch (error) {
+      console.error('Failed to play notification sound:', error);
+    }
+  };
+
+  // Start continuous notification sound (every 1 second)
+  const startContinuousNotification = () => {
+    // Stop any existing interval
+    stopContinuousNotification();
+
+    console.log('Starting continuous notification sound');
+
+    // Play immediately
+    playNotificationSound();
+
+    // Then play every 1 second
+    notificationIntervalRef.current = window.setInterval(() => {
+      playNotificationSound();
+    }, 1000);
+  };
+
+  // Stop continuous notification sound
+  const stopContinuousNotification = () => {
+    if (notificationIntervalRef.current) {
+      console.log('Stopping continuous notification sound');
+      clearInterval(notificationIntervalRef.current);
+      notificationIntervalRef.current = null;
+    }
+  };
+
+  // Toggle mute state
+  const toggleMute = () => {
+    const newMuteState = !isMuted;
+    setIsMuted(newMuteState);
+    localStorage.setItem('videoCallNotificationMuted', newMuteState.toString());
+    console.log('Notification sound', newMuteState ? 'muted' : 'unmuted');
+  };
+
+  // Handle enable audio button click
+  const handleEnableAudio = async () => {
+    const success = await initializeAudio();
+    if (success) {
+      console.log('Audio enabled by user interaction');
+    }
+  };
+
+  // Toggle auto recording
+  const toggleAutoRecording = () => {
+    const newState = !autoRecordingEnabled;
+    setAutoRecordingEnabled(newState);
+    localStorage.setItem('autoRecordingEnabled', newState.toString());
+    console.log('Auto recording', newState ? 'enabled' : 'disabled');
+  };
+
+  // Fetch room participant count
+  const fetchRoomCount = async () => {
+    try {
+      const response = await fetch('/api/webrtc-room-count?roomId=main-call');
+      const data = await response.json();
+      const count = data.count || 0;
+      previousCountRef.current = count; // Initialize previous count
+      setRoomParticipantCount(count);
+    } catch (error) {
+      console.error('Failed to fetch room count:', error);
+    }
   };
 
   // Fetch users from API
@@ -137,12 +330,84 @@ export function UserManagementPage() {
     }
   };
 
+  // Check if user is logged in
+  useEffect(() => {
+    if (!user) {
+      console.log('User not logged in, redirecting to login page');
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
   // Load users on mount and when switching to users view
   useEffect(() => {
     if (currentView === 'users') {
       fetchUsers();
     }
   }, [currentView]);
+
+  // Initialize audio on mount
+  useEffect(() => {
+    // Try to initialize audio automatically
+    initializeAudio();
+  }, []);
+
+  // Connect to WebSocket for real-time room count updates
+  useEffect(() => {
+    if (!user) return;
+
+    // Initial fetch
+    fetchRoomCount();
+
+    // Connect to WebRTC signaling WebSocket to monitor room
+    const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/webrtc/main-call?userId=monitor-${user.userId}&userName=Monitor&roomId=main-call`;
+    const ws = new WebSocket(wsUrl);
+    roomWsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('Room monitoring WebSocket connected');
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'room-count-update') {
+          console.log('Room count update:', data.count, 'Previous count:', previousCountRef.current);
+
+          // Start continuous notification when count goes from 0 to 1
+          if (previousCountRef.current === 0 && data.count === 1) {
+            console.log('Someone joined video call (count=1), starting continuous notification');
+            startContinuousNotification();
+          }
+
+          // Stop continuous notification when count becomes 0 or 2+
+          if (data.count === 0 || data.count >= 2) {
+            console.log('Participant count is', data.count, ', stopping continuous notification');
+            stopContinuousNotification();
+          }
+
+          previousCountRef.current = data.count;
+          setRoomParticipantCount(data.count);
+        }
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error('Room monitoring WebSocket error:', error);
+    };
+
+    ws.onclose = () => {
+      console.log('Room monitoring WebSocket closed');
+    };
+
+    return () => {
+      if (roomWsRef.current) {
+        roomWsRef.current.close();
+      }
+      stopContinuousNotification();
+    };
+  }, [user]);
 
   const startNFCScan = async () => {
     setNfcError(null);
@@ -221,9 +486,49 @@ export function UserManagementPage() {
         <div className="nav-brand">
           <h2>WOFF管理</h2>
         </div>
-        <button className="hamburger-button" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          ☰
-        </button>
+        <div className="nav-actions">
+          {!isAudioEnabled ? (
+            <button
+              className="enable-audio-button"
+              onClick={handleEnableAudio}
+              title="通知音を有効にする"
+            >
+              🔔
+            </button>
+          ) : (
+            <button
+              className="mute-button"
+              onClick={toggleMute}
+              title={isMuted ? '通知音をオンにする' : '通知音をオフにする'}
+            >
+              {isMuted ? '🔇' : '🔔'}
+            </button>
+          )}
+          {!isMobile && (
+            <div className="recording-control">
+              <span className="recording-label">録画</span>
+              <button
+                className={`recording-toggle ${autoRecordingEnabled ? 'enabled' : 'disabled'}`}
+                onClick={toggleAutoRecording}
+                title={autoRecordingEnabled ? '自動録画をオフにする' : '自動録画をオンにする'}
+              >
+              </button>
+            </div>
+          )}
+          <button
+            className={`video-call-button ${roomParticipantCount > 0 ? 'has-participants' : ''}`}
+            onClick={() => navigate('/video-call?room=main-call')}
+            title="ビデオ通話"
+          >
+            <span className="video-call-icon">📹</span>
+            {roomParticipantCount > 0 && (
+              <span className="online-badge">{roomParticipantCount}</span>
+            )}
+          </button>
+          <button className="hamburger-button" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            ☰
+          </button>
+        </div>
       </nav>
 
       {isMenuOpen && (

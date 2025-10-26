@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { CallbackPage } from './pages/CallbackPage';
 import { UserManagementPage } from './pages/UserManagementPage';
+import { VideoCallPage } from './pages/VideoCallPage';
 import './App.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/video-call"
+            element={
+              <ProtectedRoute>
+                <VideoCallPage />
               </ProtectedRoute>
             }
           />
