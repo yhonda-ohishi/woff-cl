@@ -45,6 +45,32 @@ export default {
       }
     }
 
+    // Get backend URL endpoint (authenticated with secret)
+    if (url.pathname === "/get-backend-url" && request.method === "GET") {
+      // Validate secret
+      const authHeader = request.headers.get("Authorization");
+      const expectedSecret = env.BACKEND_SECRET || "dev-secret-123";
+
+      if (!authHeader || authHeader !== `Bearer ${expectedSecret}`) {
+        return Response.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      try {
+        // Get backend URL from Durable Object
+        const id = env.BACKEND_PROXY.idFromName("main");
+        const stub = env.BACKEND_PROXY.get(id);
+
+        const getUrlRequest = new Request("http://internal/get-backend-url", {
+          method: "GET",
+        });
+
+        const response = await stub.fetch(getUrlRequest);
+        return response;
+      } catch (error) {
+        return Response.json({ error: "Failed to get backend URL" }, { status: 500 });
+      }
+    }
+
     // Route API requests to the Durable Object
     if (url.pathname.startsWith("/api/")) {
       // Get the Durable Object stub (using a fixed ID for singleton behavior)

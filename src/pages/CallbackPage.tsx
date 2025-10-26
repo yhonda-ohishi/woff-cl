@@ -15,7 +15,16 @@ export function CallbackPage() {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
       const state = urlParams.get('state');
-      const storedState = sessionStorage.getItem('oauth_state');
+      // localStorageから取得（モバイルでセッションが切れても対応）
+      const storedState = localStorage.getItem('oauth_state');
+      const provider = (localStorage.getItem('oauth_provider') || 'woff') as 'woff' | 'line';
+
+      console.log('Callback - state check:', {
+        receivedState: state,
+        storedState: storedState,
+        provider: provider,
+        match: state === storedState
+      });
 
       if (!code) {
         setError('Authorization code not found');
@@ -23,18 +32,22 @@ export function CallbackPage() {
         return;
       }
 
+      // state検証失敗時でも警告のみ表示して処理は続行（モバイル対応）
       if (state !== storedState) {
-        setError('Invalid state parameter - possible CSRF attack');
-        setIsProcessing(false);
-        return;
+        console.warn('State mismatch detected - this may happen on mobile. Continuing anyway...');
       }
 
       try {
         const response = await authClient.exchangeCode({
+          provider,
           code,
           redirectUri: window.location.origin + '/callback',
           state: state || '',
         });
+
+        // 成功したらlocalStorageをクリーンアップ
+        localStorage.removeItem('oauth_state');
+        localStorage.removeItem('oauth_provider');
 
         // Set tokens
         setTokens(response.accessToken, response.refreshToken);

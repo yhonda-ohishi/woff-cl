@@ -1,5 +1,6 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getRoleLabel, hasManagementAccess } from '../constants/roles';
 import './ProfilePage.css';
 
 export function ProfilePage() {
@@ -37,9 +38,11 @@ export function ProfilePage() {
       <div className="profile-card">
         <div className="profile-header">
           <h1>User Profile</h1>
-          <button onClick={() => navigate('/management')} className="management-button">
-            管理画面
-          </button>
+          {hasManagementAccess(user.roles) && (
+            <button onClick={() => navigate('/management')} className="management-button">
+              管理画面
+            </button>
+          )}
         </div>
 
         <div className="profile-info">
@@ -82,7 +85,7 @@ export function ProfilePage() {
               <div className="roles">
                 {user.roles.map((role, index) => (
                   <span key={index} className="role-badge">
-                    {role}
+                    {getRoleLabel(role)}
                   </span>
                 ))}
               </div>

@@ -8,18 +8,25 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async () => {
+  const handleLogin = async (provider: 'woff' | 'line') => {
     setIsLoading(true);
     setError(null);
 
     try {
       const state = generateRandomState();
-      sessionStorage.setItem('oauth_state', state);
+      // モバイルでセッションが切れても大丈夫なようにlocalStorageを使用
+      localStorage.setItem('oauth_state', state);
+      localStorage.setItem('oauth_provider', provider);
+
+      const scopes = provider === 'line'
+        ? ['profile', 'openid', 'email']
+        : ['user', 'user.read'];
 
       const response = await authClient.getAuthorizationURL({
+        provider,
         redirectUri: window.location.origin + '/callback',
         state,
-        scopes: ['user', 'user.read'],
+        scopes,
       });
 
       login(response.authorizationUrl);
@@ -33,8 +40,8 @@ export function LoginPage() {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>WOFF Authentication</h1>
-        <p>Login with your LINE WORKS account</p>
+        <h1>ログイン</h1>
+        <p>ログイン方法を選択してください</p>
 
         {error && (
           <div className="error-message">
@@ -42,16 +49,28 @@ export function LoginPage() {
           </div>
         )}
 
-        <button
-          onClick={handleLogin}
-          disabled={isLoading}
-          className="login-button"
-        >
-          {isLoading ? 'Redirecting...' : 'Login with LINE WORKS'}
-        </button>
+        <div className="login-buttons">
+          <button
+            onClick={() => handleLogin('woff')}
+            disabled={isLoading}
+            className="login-button login-button-woff"
+          >
+            {isLoading ? 'リダイレクト中...' : '企業アカウントでログイン'}
+            <span className="login-button-sub">LINE WORKS</span>
+          </button>
+
+          <button
+            onClick={() => handleLogin('line')}
+            disabled={isLoading}
+            className="login-button login-button-line"
+          >
+            {isLoading ? 'リダイレクト中...' : 'LINEでログイン'}
+            <span className="login-button-sub">LINE Login</span>
+          </button>
+        </div>
 
         <p className="info-text">
-          You will be redirected to LINE WORKS for authentication
+          認証画面にリダイレクトされます
         </p>
       </div>
     </div>

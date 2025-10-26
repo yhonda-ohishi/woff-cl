@@ -6,6 +6,7 @@ import { createPromiseClient } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
 import { AuthService } from '../gen/auth/v1/auth_connect';
 import { ListUsersRequest, UpdateUserRolesRequest, DeleteUserRequest, RestoreUserRequest, User } from '../gen/auth/v1/auth_pb';
+import { AVAILABLE_ROLES, getRoleLabel, hasManagementAccess } from '../constants/roles';
 import './UserManagementPage.css';
 
 type ViewType = 'users' | 'profile' | 'qr' | 'nfc';
@@ -317,7 +318,7 @@ export function UserManagementPage() {
                         <div className="detail-value">
                           {user.roles.map((role, index) => (
                             <span key={index} className="role-badge-small">
-                              {role}
+                              {getRoleLabel(role)}
                             </span>
                           ))}
                         </div>
@@ -535,14 +536,14 @@ export function UserManagementPage() {
                             <td data-label="ロール">
                               {editingUserId === userInfo.userId ? (
                                 <div className="roles-edit">
-                                  {['admin', 'user', 'viewer'].map((role) => (
+                                  {AVAILABLE_ROLES.map((role) => (
                                     <label key={role}>
                                       <input
                                         type="checkbox"
                                         checked={editingRoles.includes(role)}
                                         onChange={() => toggleRole(role)}
                                       />
-                                      <span>{role}</span>
+                                      <span>{getRoleLabel(role)}</span>
                                     </label>
                                   ))}
                                   <div className="action-buttons" style={{ marginTop: '0.5rem' }}>
@@ -567,7 +568,7 @@ export function UserManagementPage() {
                                   <div className="roles-cell">
                                     {userInfo.roles.map((role: string, index: number) => (
                                       <span key={index} className="role-badge-small">
-                                        {role}
+                                        {getRoleLabel(role)}
                                       </span>
                                     ))}
                                   </div>
@@ -584,35 +585,37 @@ export function UserManagementPage() {
                               )}
                             </td>
                             <td data-label="操作">
-                              <div className="action-buttons">
-                                {!userInfo.isDeleted && (
-                                  <>
+                              {user && hasManagementAccess(user.roles) && (
+                                <div className="action-buttons">
+                                  {!userInfo.isDeleted && (
+                                    <>
+                                      <button
+                                        className="action-button"
+                                        title="ロール編集"
+                                        onClick={() => startEditingRoles(userInfo.userId, userInfo.roles)}
+                                      >
+                                        ✏️
+                                      </button>
+                                      <button
+                                        className="action-button"
+                                        title="削除"
+                                        onClick={() => handleDeleteUser(userInfo.userId)}
+                                      >
+                                        🗑️
+                                      </button>
+                                    </>
+                                  )}
+                                  {userInfo.isDeleted && (
                                     <button
                                       className="action-button"
-                                      title="ロール編集"
-                                      onClick={() => startEditingRoles(userInfo.userId, userInfo.roles)}
+                                      title="復元"
+                                      onClick={() => handleRestoreUser(userInfo.userId)}
                                     >
-                                      ✏️
+                                      ♻️
                                     </button>
-                                    <button
-                                      className="action-button"
-                                      title="削除"
-                                      onClick={() => handleDeleteUser(userInfo.userId)}
-                                    >
-                                      🗑️
-                                    </button>
-                                  </>
-                                )}
-                                {userInfo.isDeleted && (
-                                  <button
-                                    className="action-button"
-                                    title="復元"
-                                    onClick={() => handleRestoreUser(userInfo.userId)}
-                                  >
-                                    ♻️
-                                  </button>
-                                )}
-                              </div>
+                                  )}
+                                </div>
+                              )}
                             </td>
                           </tr>
                         ))}
